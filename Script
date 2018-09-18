@@ -1,0 +1,1813 @@
+<script>
+
+        $(document).ready(function () {
+
+            Number.prototype.format = function(n, x, s, c) {
+var re = '\\d(?=(\\d{' + (x || 3) + '})+' + (n > 0 ? '\\D' : '$') + ')',
+                    num = this.toFixed(Math.max(0, ~~n));
+
+return (c ? num.replace('.', c) : num).replace(new RegExp(re, 'g'), '$&' + (s || ','));
+            };
+
+            Number.prototype.padLeft = function (n,str){
+return Array(n-String(this).length+1).join(str||'0')+this;
+            }
+//iGaranti, garanti one olarak değişti
+var WholeChannelData = null;
+var ShowMonthCount = <%#MaxMonthCount %>;
+var ShowYearCount = <%#MaxMonthYearCount %>;          
+var CustomerType = 1;
+var IsCompareModeForInternet = false;
+var IsCompareModeForMobile = false;
+var InternetTabLoadedBefore = true;
+var MobileTabLoadedBefore = false;
+var DateMode = 1;
+var DateModeText =  '<%#MultiLanguageHelper.GetTranslation("Günlük") %>';
+var SelectedDateValue = (new Date().getMonth() + 1).toString() + new Date().getFullYear().toString();
+var SelectedDateText = (new Date().getMonth() + 1).padLeft(2) + '/' + new Date().getFullYear();
+var DropdownCaretHtml = '<span class="caret"></span>';
+var LeftLineChartObj = null;
+var RightLineChartObj = null;
+var Resources = {
+                CompareLastMonth : '<%#MultiLanguageHelper.GetTranslation("DIGITAL_CHANNELS_COMPARE_LAST_MONTH") %>',
+                Etkin: '<%#MultiLanguageHelper.GetTranslation("Etkin") %>',
+                Aktif: '<%#MultiLanguageHelper.GetTranslation("Aktif") %>',
+                Sadece: '<%#MultiLanguageHelper.GetTranslation("Sadece") %>',
+                CompareLastYear : '<%#MultiLanguageHelper.GetTranslation("Geçen yıl ile karşılaştır") %>',
+                MobileBranch: '<%#MultiLanguageHelper.GetTranslation("Cep Şube") %>',
+                MobileBranchLastMonth: '<%#MultiLanguageHelper.GetTranslation("Cep Şube-Geçen Ay") %>',
+                iGarantiLastMonth: '<%#MultiLanguageHelper.GetTranslation("Garanti One-Geçen Ay") %>',
+                BonusFlashLastMonth: '<%#MultiLanguageHelper.GetTranslation("Bonus Flaş-Geçen Ay") %>',
+                InternetBranchLastMonth: '<%#MultiLanguageHelper.GetTranslation("İnternet Şube-Geçen Ay") %>',    
+                ATMLastMonth: '<%#MultiLanguageHelper.GetTranslation("ATM-Geçen Ay") %>',                
+                BonusFlash: '<%#MultiLanguageHelper.GetTranslation("Bonus Flaş") %>',
+                ATM: '<%#MultiLanguageHelper.GetTranslation("ATM") %>',
+                iGaranti: '<%#MultiLanguageHelper.GetTranslation("Garanti One") %>',
+                AndroidPhone: '<%#MultiLanguageHelper.GetTranslation("Android Phone") %>',
+                iPhone: '<%#MultiLanguageHelper.GetTranslation("iPhone") %>',
+                iPad: '<%#MultiLanguageHelper.GetTranslation("iPad") %>',
+                AndroidTablet: '<%#MultiLanguageHelper.GetTranslation("Android Tablet") %>',
+                WindowsPhone : '<%#MultiLanguageHelper.GetTranslation("Windows Phone") %>',
+                MobileWeb : '<%#MultiLanguageHelper.GetTranslation("Mobil Web") %>',
+                MoneyTransfer: '<%#MultiLanguageHelper.GetTranslation("Para Transferi") %>',
+                Payments: '<%#MultiLanguageHelper.GetTranslation("Ödemeler") %>',
+                Credit: '<%#MultiLanguageHelper.GetTranslation("Yatırım") %>',
+                EVadeli: '<%#MultiLanguageHelper.GetTranslation("E-vadeli") %>',
+                Cards: '<%#MultiLanguageHelper.GetTranslation("Kartlar") %>',
+                Months: [],
+                Days: [],
+                CardCustomer: '<%#MultiLanguageHelper.GetTranslation("Kartlı Müşteri") %>',
+                AvgResponseTime:'<%#MultiLanguageHelper.GetTranslation("Response Time Ort.") %>',
+                ActiveCustomer:'<%#MultiLanguageHelper.GetTranslation("DIGITAL_CHANNELS_ETKIN_MUSTERI") %>',
+                InternetBanking: '<%#MultiLanguageHelper.GetTranslation("İnternet Bankacılığı") %>',
+                MobileBanking: '<%#MultiLanguageHelper.GetTranslation("Mobil Bankacılığı") %>',
+                Download: '<%#MultiLanguageHelper.GetTranslation("Download") %>',
+                Customer: '<%#MultiLanguageHelper.GetTranslation("Müşteri") %>',
+                InternetBranch: '<%#MultiLanguageHelper.GetTranslation("İnternet Şube") %>',
+                LastMonth: '<%#MultiLanguageHelper.GetTranslation("Geçen Ay") %>',
+                CumulativeDailyCustomer: '<%#MultiLanguageHelper.GetTranslation("DIGITAL_CHANNELS_CUMULATIVE_TOTAL") %>',
+                DailyCustomer: '<%#MultiLanguageHelper.GetTranslation("Günlük Müşteri") %>',
+                MonthlyCustomer: '<%#MultiLanguageHelper.GetTranslation("Aylık Müşteri") %>',
+                Login: '<%#MultiLanguageHelper.GetTranslation("MSG_HYS_Login_Channel") %>',
+                DayName: '<%#MultiLanguageHelper.GetTranslation("MSG_HYS_Day_Name") %>' ,
+                ParaÇekme: '<%#MultiLanguageHelper.GetTranslation("ParaCekme") %>',
+                NoCardCusmoter:'<%#MultiLanguageHelper.GetTranslation("NoCardCusmoter") %>',
+                NotOnUs: '<%#MultiLanguageHelper.GetTranslation("NotOnUs") %>',
+                KKBorcOdeme: '<%#MultiLanguageHelper.GetTranslation("KKBorcOdeme") %>',
+                HesabaParaYatırma: '<%#MultiLanguageHelper.GetTranslation("HesabaParaYatırma") %>',
+                NakitAvans: '<%#MultiLanguageHelper.GetTranslation("NakitAvans") %>',
+                Diğer: '<%#MultiLanguageHelper.GetTranslation("Diger") %>',
+                MonthInfo: '<%#MultiLanguageHelper.GetTranslation("DIGITAL_CHANNELS_MONTH_INFO") %>',
+                CumulativeDiff: '<%#MultiLanguageHelper.GetTranslation("DIGITAL_CHANNELS_CUMULATIVE_DIFF") %>',
+                GarantiTablet: '<%#MultiLanguageHelper.GetTranslation("DIGITAL_CHANNELS_GARANTI_TABLET") %>',
+                ATMExplanation:'<%#MultiLanguageHelper.GetTranslation("ATMExplanation") %>',
+                MonthlyKumuleCustomer:'<%#MultiLanguageHelper.GetTranslation("Aylık Kümülatif Müşteri") %>',
+                KartsızParaYatırma: '<%#MultiLanguageHelper.GetTranslation("KartsızParaYatırma") %>',
+                KartsızQRParaÇekme: '<%#MultiLanguageHelper.GetTranslation("KartsızQRParaÇekme") %>',
+                KartsızCBParaCekme: '<%#MultiLanguageHelper.GetTranslation("KartsızCBParaCekme") %>',
+                KartsızKKBorcOdeme: '<%#MultiLanguageHelper.GetTranslation("KartsızKKBorcOdeme") %>',
+                KartsızFatura: '<%#MultiLanguageHelper.GetTranslation("KartsızFatura") %>',
+                KartsizDiger: '<%#MultiLanguageHelper.GetTranslation("KartsizDiger") %>',
+                KartliFatura: '<%#MultiLanguageHelper.GetTranslation("KartliFatura") %>'
+            };
+
+var monthNames;
+var monthNamesShort;
+var dayNames;
+if(currentLanguage == 2)
+            {
+                monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+                monthNamesShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            }
+else
+            {
+                monthNames = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',  'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'],
+                monthNamesShort = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+                dayNames = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
+            }
+
+            Resources.Months = monthNames;
+            Resources.Days = dayNames;
+
+var month = new Date().getMonth() - 1;
+
+if(month==-1) month=11;
+
+            $('#MonthInfoSpan').text('*'+monthNames[month]+' '+Resources.MonthInfo);
+
+            $( "#filterArea" ).bind({
+                popupafterclose: function(event, ui) { 
+                    $('#slcDate').find('.dropdown-toggle').attr('data-selected-value', SelectedDateValue);
+                    $('#slcDate').find('.dropdown-toggle').text(SelectedDateText);
+                    $('#slcTimeViewChanger').find('.dropdown-toggle').html(DateModeText + ' ' + DropdownCaretHtml);
+                    $('#slcTimeViewChanger').find('.dropdown-toggle').attr('data-selected-value', DateMode);
+                    $('#slcTimeViewChanger').find('li').attr('data-selected', false);
+                    $('#slcTimeViewChanger').find('li[data-value="' + DateMode + '"]').attr('data-selected', true);
+
+if(DateMode == 1){
+                        fillMonths()
+                    }
+else{
+                        fillYears();
+                    }
+
+                }              
+            });
+
+            $('#tab1').show();
+            $('#tab2').hide();
+
+            $('#slcTimeViewChanger .dropdown-menu a').click(function(){
+var value = $(this).parent().attr('data-value');
+
+var selectedText = $(this).text();                     
+var toggleBtn =  $('#slcTimeViewChanger').find('.dropdown-toggle');           
+                $(this).parent().siblings().attr('data-selected', false);
+                $(this).parent().attr('data-selected', true);
+                toggleBtn.html(selectedText+' <span class="caret"></span>');
+                toggleBtn.attr('data-selected-value', value);                
+if(value == 1){
+                    fillMonths();                         
+                }
+else {
+                    fillYears();                    
+                }              
+            });
+
+            $('#slcDate .dropdown-menu a').click(function(){
+                slcDateOnSelected($(this));
+
+            });
+
+function slcDateOnSelected(obj){
+var value = obj.parent().attr('data-value');
+var year = obj.parent().attr('data-year');
+var month = obj.parent().attr('data-month');
+var selectedText = obj.text();                     
+var toggleBtn =  $('#slcDate').find('.dropdown-toggle');           
+                obj.parent().siblings().attr('data-selected', false);
+                obj.parent().attr('data-selected', true);
+                toggleBtn.html(selectedText+' <span class="fa fa-calendar calendar"></span>');
+                toggleBtn.attr('data-selected-value', value);
+                toggleBtn.attr('data-year', year); 
+                toggleBtn.attr('data-month', month);
+            }
+
+            $('.customer-type-wrapper span').on('click', function(){
+
+if(!$(this).hasClass('selected')){
+                    CustomerType = $(this).attr('data-type');
+                    $(this).toggleClass('selected');
+                    $(this).siblings().toggleClass('selected');
+                    getDigitalChannelWholeData((new Date().getMonth() + 1), new Date().getFullYear(),true);
+                }              
+            });
+
+            $('#individualTabs .nav-bar li a').on('click tap touchstart', function(){
+var type = $(this).attr('data-type');
+
+if(type == 1){      
+                    $('#tab1').show();
+                    $('#tab2').hide();
+                    $('#effectiveCustomerSection').show();
+                    $('#effectiveCustomerSectionForMobile').hide();
+if(!InternetTabLoadedBefore){
+                        refreshLineChartDataForInternetView(); 
+                        InternetTabLoadedBefore = true;
+                    }
+
+                    $('#middleLineChartForInternetBranch').highcharts().reflow();
+                    $('#mblChartLeftForTransactions').highcharts().reflow();
+                    $('#mblChartLeftForTransactions2').highcharts().reflow();
+                    $('#mblChartRightForTransactions').highcharts().reflow();
+                    $('#mblChartRightForTransactions2').highcharts().reflow();
+
+                }
+else {
+                    $('#tab1').hide();
+                    $('#tab2').show();
+                    $('#effectiveCustomerSection').hide();
+                    $('#effectiveCustomerSectionForMobile').show();
+if(!MobileTabLoadedBefore){
+                        refreshLineChartDataForMobileView();                
+                        MobileTabLoadedBefore = true;
+                    }
+
+                    $('#middleLineChartForMobileBranch').highcharts().reflow();
+//$('#mblChartLeft').highcharts().reflow();
+//$('#mblChartRight').highcharts().reflow();
+//$('#mblChartLeft2').highcharts().reflow();
+//$('#mblChartRight2').highcharts().reflow();
+                    $('#mblChartLeftForTransactions').highcharts().reflow();
+                    $('#mblChartLeftForTransactions2').highcharts().reflow();
+                    $('#mblChartRightForTransactions').highcharts().reflow();
+                    $('#mblChartRightForTransactions2').highcharts().reflow();
+                }                
+            });
+
+            $('#chkCompareForInternetView').change(function() {
+if($(this).is(":checked")) {
+                    IsCompareModeForInternet = true;
+                    refreshLineChartDataForInternetView(true);                          
+                }
+else{
+                    IsCompareModeForInternet = false;
+                    refreshLineChartDataForInternetView(false);                         
+                }
+            });
+
+            $('#chkCompareForMobileView').change(function() {
+if($(this).is(":checked")) {
+                    IsCompareModeForMobile = true;
+                    refreshLineChartDataForMobileView(true);  
+
+                }
+else{
+                    IsCompareModeForMobile = false;
+                    refreshLineChartDataForMobileView(false);                          
+                }
+            });
+
+
+            $('#btnApplyFilter').on('click', function(){
+                $("#filterArea" ).popup( "close");
+                SelectedDateText = $('#slcDate').find('.dropdown-toggle').text();
+                SelectedDateValue = $('#slcDate').find('.dropdown-toggle').attr('data-selected-value'); 
+
+var month = $('#slcDate').find('.dropdown-toggle').attr('data-month'); 
+var year = $('#slcDate').find('.dropdown-toggle').attr('data-year'); 
+
+                DateModeText= $('#slcTimeViewChanger').find('.dropdown-toggle').text();
+                DateMode = $('#slcTimeViewChanger').find('.dropdown-toggle').attr('data-selected-value');
+if(DateMode == 1){
+                    $('.compare-selector').show();
+                    $('.compare-selector').find('label').text(Resources.CompareLastMonth);
+                }
+else {
+                    year = SelectedDateValue;
+                    $('.compare-selector').hide();
+                    IsCompareModeForInternet = false;
+                    IsCompareModeForMobile = false;
+                    $('#chkCompareForInternetView').prop('checked', false);
+                    $('#chkCompareForMobileView').prop('checked', false);
+                }
+                $('#selectWorkAreaLink').text(SelectedDateText);
+
+if(typeof month === "undefined"){
+                    month = new Date().getMonth() + 1;
+                }
+
+if(typeof year === "undefined"){
+                    year = new Date().getFullYear();
+                }
+
+                getLineChartData(month, year);                               
+            });
+
+var bonusFlashColorArrForPie = ['#b44ec3', '#9d39ae', '#ca63da', '#df77ee', '#f38af6'];
+var mobileBranchColorArrForPie = ['#4996eb', '#3084d8', '#559ef5', '#69afff', '#82c5ff'];
+var iGarantiColorArrForPie = ['#F4D497', '#E29D1B', '#D38E0C', '#FFC55A', '#F5D075'];
+var internetBankingColorArrForPie = ['#4996eb', '#b44ec3', '#FFC55A', '#E65E5E', '#75e1df'];
+var mobileWebColorArrForPie=['#E65E5E','#f38080','#E65E5E','#E65E5E'];                                        
+            getDigitalChannelWholeData((new Date().getMonth() + 1), new Date().getFullYear(),false);
+
+
+            $('<div style="font-size: small; color: darkgrey; margin:2px;"></div>')
+               .appendTo('#ATMExplanation')
+               .html(Resources.ATMExplanation);
+
+
+function initialize(withDate){ 
+                bindGeneralViewCounts();
+                initializeInternetMobileBankingTransactionCounts();
+if(withDate==true)
+                {
+                    SelectedDateValue = $('#slcDate').find('.dropdown-toggle').attr('data-selected-value'); 
+
+var month = $('#slcDate').find('.dropdown-toggle').attr('data-month'); 
+var year = $('#slcDate').find('.dropdown-toggle').attr('data-year'); 
+
+                    DateMode = $('#slcTimeViewChanger').find('.dropdown-toggle').attr('data-selected-value');
+if(DateMode == 2){
+                        year = SelectedDateValue;
+                    }
+
+if(typeof month === "undefined"){
+                        month = new Date().getMonth() + 1;
+                    }
+
+if(typeof year === "undefined"){
+                        year = new Date().getFullYear();
+                    }
+
+                    getLineChartData(month, year);   
+                }else{
+                    refreshLineChartDataForInternetView();
+                    refreshLineChartDataForMobileView(); 
+                }
+                refreshPieChartLoginData();
+                refreshPieChartATMData();
+            }
+
+function initializeInternetMobileBankingTransactionCounts(){
+                refreshInternetMobileBankingTransactionCounts();
+
+            }
+
+function fillMonths(){
+
+var monthValues =   [];
+
+var currentDate = new Date();
+for(var i = 0; i < ShowMonthCount; i++){
+var d = new Date();
+var newDate = moment(d).add(-i,'months');                   
+                    monthValues.push(
+                    {
+                        text: (moment(newDate).get('month') + 1).padLeft(2) + '/' +  moment(newDate).get('year'),
+                        month: moment(newDate).get('month') + 1,
+                        year: moment(newDate).get('year'),
+                        value:  (moment(newDate).get('month') + 1).toString() + moment(newDate).get('year').toString()
+                    }
+                  );
+                }
+
+var menu = $('#slcDate').find('.dropdown-menu');
+                menu.empty();
+
+                $.each(monthValues, function (i, item) {                    
+var li = $('<li></li>').append($('<a></a>').attr('href','#').text(item.text))
+                                           .attr('data-year', item.year)
+                                           .attr('data-month', item.month)
+                                           .attr('data-value', item.value);
+                    menu.append($(li));
+                });
+
+var currentSelectedText = '';              
+if(DateMode == 2){
+                    currentSelectedText = menu.find('li:first a').text();
+                    menu.find('li:first').attr('data-selected', true);
+                    $('#slcDate').find('.dropdown-toggle').attr('data-selected-value',  menu.find('li:first').attr('data-value'));
+                    $('#slcDate').find('.dropdown-toggle').attr('data-month',  menu.find('li:first').attr('data-month'));
+                    $('#slcDate').find('.dropdown-toggle').attr('data-year',  menu.find('li:first').attr('data-year'));
+                }
+else {
+                    currentSelectedText =  SelectedDateText;
+                    menu.find('li[data-value="' + SelectedDateValue + '"]').attr('data-selected', true);
+                }
+
+                $('#slcDate').find('.dropdown-toggle').html(currentSelectedText + ' <span class="fa fa-calendar calendar"></span>');               
+
+                $('#slcDate .dropdown-menu a').off().on('click', function(){
+
+                    slcDateOnSelected($(this));
+
+                });
+            }
+
+function fillYears(){
+
+var monthValues =   [];
+
+var currentDate = new Date();
+for(var i = 0; i < ShowYearCount; i++){
+var d = new Date();
+var newDate = moment(d).add(-i,'years');                   
+                    monthValues.push(
+                    {
+                        text: moment(newDate).get('year'),                     
+                        value: moment(newDate).get('year')
+                    }
+                        );
+                }
+
+var menu = $('#slcDate').find('.dropdown-menu');
+                menu.empty();
+
+                $.each(monthValues, function (i, item) {
+var li = $('<li></li>').append($('<a></a>').attr('href','#').text(item.text))
+                                          .attr('data-value', item.value);   
+                    menu.append($(li));
+                });
+
+
+var currentSelectedText = '';
+var currentValue = '';
+
+if(DateMode == 1){                             
+                    currentSelectedText = menu.find('li:first a').text();
+                    currentValue = menu.find('li').attr('data-value');
+                    menu.find('li:first').attr('data-selected', true);
+                    $('#slcDate').find('.dropdown-toggle').attr('data-selected-value', currentValue);
+                }
+else {                    
+                    currentSelectedText =  SelectedDateText;
+                    currentValue = SelectedDateValue;
+                    menu.find('li[data-value="' + SelectedDateValue + '"]').attr('data-selected', true);
+                }
+
+
+                $('#slcDate').find('.dropdown-toggle').html(currentSelectedText + ' <span class="fa fa-calendar calendar"></span>');                
+                $('#slcDate .dropdown-menu a').off().on('click', function(){                    
+                    slcDateOnSelected($(this));               
+                });
+            }
+
+function startIntro(){
+                $('.step-wrapper').startIntro();             
+            }
+
+function getLineChartData(month, year){ 
+                 HideLoading();
+                 ShowLoading();
+//initialize();     
+                $.ajax({
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    url: '/Helpers/Services/ProjectPlanService.asmx/RefreshLineChart',
+                    data: '{year:' + year + 
+', month:'+ month +
+'}',
+                    dataType: "json",
+                    success: function (data) {
+try{
+var result = JSON.parse(data.d);
+                            console.log(result);
+                            WholeChannelData = result;  
+                            refreshLineChartDataForInternetView();     
+                            refreshLineChartDataForMobileView();
+                        }catch(ex){
+                            HideLoading();
+                        }                        
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        console.log(thrownError);
+                        refreshLineChartDataForInternetView();      
+                        refreshLineChartDataForMobileView();
+                        HideLoading();
+                    },
+                    complete: function () {
+
+                    }
+                });
+            }
+function getDigitalChannelWholeData(month, year,withDate){             
+                ShowLoading();
+     
+                $.ajax({
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    url: '/Helpers/Services/ProjectPlanService.asmx/Get2017DigitalChannelsData',
+                    data: '{year:' + year + 
+', month:'+ month +
+', generalViewYear:' + new Date().getFullYear() + 
+', generalViewMonth: '+ new Date().getMonth() + 
+'}',
+                    dataType: "json",
+                    success: function (data) {
+try{
+var result = JSON.parse(data.d);
+
+                            WholeChannelData = result;  
+                            initialize(withDate); 
+                        }catch(ex){
+                            HideLoading();
+                        }                        
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        console.log(xhr);
+                        initialize(withDate);                            
+                        HideLoading();
+                    },
+                    complete: function () {
+
+                    }
+                });
+            }
+
+function bindGeneralViewCounts(){
+
+var referanceDataForTotal = CustomerType == 1 ? WholeChannelData.DigitalChannelTotalCountsIndividual
+                                                    : WholeChannelData.DigitalChannelTotalCountsCorporate;
+
+                $('#countActiveCustomer').html(nFormatter(IsNull(referanceDataForTotal[0].AktifMusteri)));
+                $('#countEffectiveCustomer').html(nFormatter(IsNull(referanceDataForTotal[0].EtkinMusteri)));
+
+
+
+var referanceData = CustomerType == 1 ? WholeChannelData.DigitalChannelGeneralViewIndividual
+                                                          : WholeChannelData.DigitalChannelGeneralViewCorporate;
+                    $('#channelsTable').DataTable( {
+"data" : referanceData,
+"bSort": false,
+"paging": false,
+"DeferRender": true,
+// "deferLoading": 0, 
+"destroy": true,
+"info": false,
+"searching":false,
+"columns":[
+                        {"data":"Name",
+"render":function(data, type, full, meta){
+if(data==undefined||data==null||data=='')
+return"-";
+elseif(data=='ETKİN')
+return Resources.Etkin;
+elseif(data=='AKTİF')
+return Resources.Aktif;
+elseif(data=='SADECE')
+return Resources.Sadece;
+                        }},
+                        { "data": "CepSube",
+"render":function(data, type, full, meta){
+if(data==undefined||data==null||data=='')
+return"-";
+elsereturn nFormatter(IsNull(data))+' (%'+IsNull(full.CepSubeArtis).toFixed(2)+')';
+                            }},
+                        { "data": "WEB" ,
+"render":function(data, type, full, meta){
+if(data==undefined||data==null||data=='')
+return"-";
+elsereturn nFormatter(IsNull(data))+' (%'+IsNull(full.WEBArtis).toFixed(2)+')';
+                            }},
+                        { "data": "GARANTIONE",
+"render":function(data, type, full, meta){
+if(data==undefined||data==null||data=='')
+return"-";
+elsereturn nFormatter(IsNull(data))+' (%'+IsNull(full.GARANTIONEArtis).toFixed(2)+')';
+                        } }, { "data": "ATM",
+"render":function(data, type, full, meta){
+if(data==undefined||data==null||data=='')
+return"-";
+elsereturn nFormatter(IsNull(data))+' (%'+IsNull(full.ATMArtis).toFixed(2)+')';
+                            } },
+                        { "data": "BonusFlas",
+"render":function(data, type, full, meta){
+if(data==undefined||data==null||data=='')
+return"-";
+elsereturn nFormatter(IsNull(data))+' (%'+IsNull(full.BonusFlasArtis).toFixed(2)+')';
+                            } }
+
+                        ] 
+
+                    } );
+            }
+
+function bindTotalLoginCounts(){
+if(DateMode == 1){
+var referanceData = CustomerType == 1 ? WholeChannelData.DigitalChannelTotalCountsIndividual[0]
+                                                         : WholeChannelData.DigitalChannelTotalCountsCorporate[0];
+
+                    $('#countTotalCustomerForInternet').html(IsNull(referanceData.BireyselİntsubemusloginsValue).format(0,3,'.'));
+                    $('#countTotalLoginForInternet').html(IsNull(referanceData.BireyselintSubeLoginSValue).format(0,3,'.'));
+                    $('#countTotalCustomerOnlyForInternet').html(IsNull(referanceData.BireyselSadeceIntSubeKullananMusSayValue).format(0,3,'.'));
+                    $('#leftLoginMonthName').html(Resources.Months[referanceData.ay - 1]);
+                    $('#leftLoginDate').html('(' + referanceData.Gun.padLeft(2) + '/' + referanceData.ay.padLeft(2) + '/' + referanceData.Yıl + ')');
+
+                    $('#countTotalCustomerForMobile').html(IsNull(referanceData.BireyselCepŞubemusloginsValue).format(0,3,'.'));
+                    $('#countTotalLoginForMobile').html(IsNull(referanceData.BireyselCepsubeLoginSayValue).format(0,3,'.'));
+                    $('#countTotalCustomerOnlyForMobile').html(IsNull(referanceData.BireyselSadeceCepSubeKullananMusSayValue).format(0,3,'.'));
+                    $('#rightLoginMonthName').html(Resources.Months[referanceData.ay1 - 1]);
+                    $('#rightLoginDate').html('(' + referanceData.Gun1.padLeft(2) + '/' + referanceData.ay1.padLeft(2) + '/' + referanceData.yıl1 + ')');
+                }
+            }
+
+function refreshInternetMobileBankingTransactionCounts(){
+
+var referanceData;
+
+                referanceData = CustomerType == 1 ? WholeChannelData.InternetMobileBankingTransactionCountsIndividual
+                                                    : WholeChannelData.InternetMobileBankingTransactionCountsCorporate;
+                $('#garantiInternetTotal').html(nFormatter(referanceData[0].IntSubeToplam));
+                $('#garantiInternetOdemeler').html(nFormatter(referanceData[0].IntSubeOdemeler));
+                $('#garantiInternetOdemeler').html(nFormatter(referanceData[0].IntSubeOdemeler));
+                $('#garantiInternetPT').html(nFormatter(referanceData[0].IntSubePT));
+                $('#garantiInternetYatirim').html(nFormatter(referanceData[0].IntSubeYatırım));
+
+                $('#garantiInternetOdemelerDif').html(minusPlusFormatter(nFormatter(referanceData[0].IntSubeodemeArtis).toFixed(2)));
+                $('#garantiInternetPTDif').html(minusPlusFormatter(nFormatter(referanceData[0].IntSubePTArtis).toFixed(2)));
+                $('#garantiInternetYatirimDif').html(minusPlusFormatter(nFormatter(referanceData[0].IntSubeYatırımArtis).toFixed(2)));
+
+                $('#garantiCepTotal').html(nFormatter(referanceData[0].CepSubeToplam));
+                $('#garantiCepOdemeler').html(nFormatter(referanceData[0].CepSubeOdemeler));
+                $('#garantiCepPT').html(nFormatter(referanceData[0].CePSubePT));
+                $('#garantiCepYatirim').html(nFormatter(referanceData[0].CepSubeYatırım));
+
+                $('#garantiCepOdemelerDif').html(minusPlusFormatter(nFormatter(referanceData[0].CepSubeOdemelerArtis).toFixed(2)));
+                $('#garantiCepPTDif').html(minusPlusFormatter(nFormatter(referanceData[0].CePSubePTArtis).toFixed(2)));
+                $('#garantiCepYatirimDif').html(minusPlusFormatter(nFormatter(referanceData[0].CepSubeYatırımArtis).toFixed(2)));
+
+
+            }
+
+
+function refreshLineChartDataForInternetView(isCompareMode, selectedLegendId){
+                HideLoading();
+                ShowLoading();
+var referanceData;
+var referanceDataForPreviousMonth = null;
+var data = [];
+var dataLastMonth = [];
+var dataCepSube = [];
+var dataCepSubeLastMonth = [];
+var dataBonusFlas = [];
+var dataBonusFlasLastMonth = [];
+var dataIGaranti = [];
+var dataIGarantiLastMonth = [];
+var dataATM = [];
+var dataATMLastMonth = [];
+var categories= [];
+var categoriesForLastMonth= [];
+var maxXaxis = null;
+
+if(DateMode == 1){
+
+                    referanceData = CustomerType == 1 ? WholeChannelData.DigitalChannelDailyLoginCountsIndividual
+                                                     : WholeChannelData.DigitalChannelDailyLoginCountsCorporate;
+
+                    referanceDataForPreviousMonth = CustomerType == 1 ? WholeChannelData.DigitalChannelDailyForPreviousMonthLoginCountsIndividual
+                                                     : WholeChannelData.DigitalChannelDailyForPreviousMonthLoginCountsCorporate;
+
+                    $.each(referanceData, function(i, item){                            
+if(!item.BonusFlasGunlukMusteri){
+                            item.BonusFlasGunlukMusteri = 0;
+                            item.BonusFlasLoginSayısı = 0;
+                        }
+                        categories.push(moment(item.Date).toDate().getDate());
+var dayName = Resources.Days[moment(item.Date).toDate().getDay()];
+
+                        data.push({ y:IsNull(item.IntSubeLoginSayısı), login:IsNull(item.IntSubeGunlukMusteri).format(0,3,'.'), avgResponseTime:item.IntSubeLoginYS ,date: moment(item.Date)});                        
+                        dataCepSube.push({y:IsNull(item.CepSubeLoginSayısı), login:IsNull(item.CepSubeGunlukMusteri).format(0,3,'.') ,avgResponseTime:item.CepSubeAndroidYS, date: moment(item.Date)});
+                        dataIGaranti.push({y:IsNull(item.GarantiOneLoginSayısı), login:IsNull(item.GarantiOneGunlukMusteri).format(0,3,'.'), avgResponseTime:item.GarantiOneYS, date: moment(item.Date)});
+                        dataBonusFlas.push({y: IsNull(item.BonusFlasLoginSayısı) , login: IsNull(item.BonusFlasGunlukMusteri).format(0,3,'.'),  avgResponseTime:item.BonusFlasYS,date: moment(item.Date)});
+                        dataATM.push({y:IsNull(item.ATMLogin), login: IsNull(item.ATMMusteri).format(0,3,'.'), avgResponseTime:item.ATMYS, date: moment(item.Date)});
+
+                    });
+
+                    $.each(referanceDataForPreviousMonth, function(i, item){ 
+if(!item.BonusFlasGunlukMusteri){
+                            item.BonusFlasGunlukMusteri = 0;
+                            item.BonusFlasLoginSayısı = 0;
+                        }
+                        categoriesForLastMonth.push(moment(item.Date).toDate().getDate());
+var dayName = Resources.Days[moment(item.Date).toDate().getDay()];
+                        dataLastMonth.push({y:IsNull(item.IntSubeLoginSayısı), login:IsNull(item.IntSubeGunlukMusteri) .format(0,3,'.'),avgResponseTime:item.IntSubeLoginYS , date: moment(item.Date)});                        
+                        dataCepSubeLastMonth.push({y:IsNull(item.CepSubeLoginSayısı), login:IsNull(item.CepSubeGunlukMusteri).format(0,3,'.'),avgResponseTime:item.CepSubeAndroidYS, date: moment(item.Date)});
+                        dataIGarantiLastMonth.push({y:IsNull(item.GarantiOneLoginSayısı), login:IsNull(item.GarantiOneGunlukMusteri).format(0,3,'.'), avgResponseTime:item.GarantiOneYS, date: moment(item.Date)});
+                        dataBonusFlasLastMonth.push({y: IsNull(item.BonusFlasLoginSayısı)  , login:IsNull(item.BonusFlasGunlukMusteri).format(0,3,'.'),  avgResponseTime:item.BonusFlasYS, date: moment(item.Date)});
+                        dataATMLastMonth.push({y: IsNull(item.ATMLogin), login:IsNull(item.ATMMusteri).format(0,3,'.'), avgResponseTime:item.ATMYS, date: moment(item.Date)});
+                    });
+                }
+else{
+                    referanceData = CustomerType == 1 ? WholeChannelData.DigitalChannelYearlyLoginCountsIndividual
+                                                    : WholeChannelData.DigitalChannelYearlyLoginCountsCorporate;
+
+                    maxXaxis = 11;
+                    categories = Resources.Months;
+                    $.each(referanceData, function(i, item){      
+if(!item.BonusFlasMusteri){
+                            item.BonusFlasMusteri = 0;
+                            item.BonusFlasLoginSayısı = 0;
+                        }
+
+
+                        data.push({y:IsNull(item.IntSubeLoginSayısı), login:IsNull(item.IntSubeMusteri.format(0,3,'.'))});
+                        dataCepSube.push({y:IsNull(item.CepSubeLoginSayısı), login:IsNull(item.CepSubeMusteri.format(0,3,'.'))});
+                        dataIGaranti.push({y:IsNull(item.GarantiOneLoginSayısı), login:IsNull(item.GarantiOneMusteri.format(0,3,'.'))});
+                        dataBonusFlas.push({y: IsNull(item.BonusFlasLoginSayısı)  , login:IsNull(item.BonusFlasMusteri).format(0,3,'.')});
+                        dataATM.push({y: IsNull(item.ATMLogin), login:IsNull(item.ATMMusteri).format(0,3,'.')});
+
+                    });
+
+                }
+                seriesForInternetView = [
+                         {
+                             id:1,
+                             name: Resources.MobileBranch,
+                             color: 'rgb(73,150,235)',
+                             data: dataCepSube,
+                             dataLastMonth: dataCepSubeLastMonth,
+                             previousItemTitle: Resources.LastMonth,
+                             visible: true,
+                         } ,
+                            {
+                                id:2,
+                                name: Resources.iGaranti,
+                                color: 'rgb(244, 183, 76)',
+                                data: dataIGaranti,
+                                dataLastMonth: dataIGarantiLastMonth,
+                                previousItemTitle: Resources.LastMonth,
+                                visible: false,
+                            } ,
+                             {
+                                 id:3,
+                                 name: Resources.BonusFlash,
+                                 color: 'rgb(180,78,195)',
+                                 data: dataBonusFlas,
+                                 dataLastMonth: dataBonusFlasLastMonth,
+                                 previousItemTitle: Resources.LastMonth,
+                                 visible: false
+                             },
+                              {
+                                  id:4,
+                                  name: Resources.InternetBranch,
+                                  color: 'rgb(38,158,157)',
+                                  dataLastMonth: dataLastMonth,
+                                  previousItemTitle: Resources.LastMonth,
+                                  data:data,
+                                  visible: false
+                              } 
+                              ,
+                               {
+                                   id:5,
+                                   name: Resources.ATM,
+                                   color: '#e65e5e',
+                                   data:dataATM,
+                                   dataLastMonth:dataATMLastMonth,
+                                   previousItemTitle: Resources.LastMonth,
+                                   visible: false
+                               }                                         
+                ];
+
+if(DateMode == 1 && (isCompareMode || IsCompareModeForInternet)){
+if(typeof selectedLegendId === "undefined"){
+                        selectedLegendId = 1;
+                    }
+
+if(categories.length < categoriesForLastMonth.length){
+                        categories = categoriesForLastMonth;
+                    }
+
+var currentSerieItem = null;
+                    $.each(seriesForInternetView, function(i, serieItem){
+if(serieItem.id == selectedLegendId){
+                            serieItem.visible = true;
+                            currentSerieItem = serieItem;
+                        }
+else{
+                            serieItem.visible = false;
+                        }
+                    });
+
+
+                    seriesForInternetView.push(
+                        {
+                            id: 6,
+                            name: currentSerieItem.previousItemTitle ,
+                            color: '#dadfe4',
+                            data: currentSerieItem.dataLastMonth,
+                            isPreviousItem: true
+                        }  
+                        );
+                }
+elseif(DateMode == 1 && !isCompareMode && !IsCompareModeForInternet){
+var currentDate = new Date();
+var month = $('#slcDate').find('.dropdown-toggle').attr('data-month'); 
+var year = $('#slcDate').find('.dropdown-toggle').attr('data-year'); 
+var currentMonth = currentDate.getMonth() + 1;
+var currentYear = currentDate.getFullYear();
+if(typeof month === "undefined"&&typeof year === "undefined"){
+                        month = currentDate.getMonth() + 1;
+                        year = currentDate.getFullYear();
+                    }
+
+if(month == currentMonth && year == currentYear){
+var dayCount = new Date(currentYear, currentMonth, 0).getDate();
+var newCategories = [];
+                        maxXaxis = dayCount - 1;
+for(var i = 1; i <= dayCount; i++){
+                            newCategories.push(i);
+                        }
+
+                        categories = newCategories;
+                    }
+                }
+                $('#middleLineChartForInternetBranch')
+                    .highcharts(getLineChartOptionsForInternetView(categories, seriesForInternetView, maxXaxis));
+                HideLoading();
+            }
+
+function refreshLineChartDataForMobileView(isCompareMode, selectedLegendId){
+var referanceData;
+var referanceDataForPreviousMonth = null;
+var dataInternet = [];
+var dataInternetLastMonth = [];
+var dataCepSube = [];
+var dataCepSubeLastMonth = [];
+var dataBonusFlas = [];
+var dataBonusFlasLastMonth = [];
+var dataIGaranti = [];
+var dataIGarantiLastMonth = [];
+var dataATM = [];
+var dataATMLastMonth = [];
+var categories= [];
+var categoriesForLastMonth= [];
+var maxXaxis = null;
+
+if(DateMode == 1){
+                    referanceData = CustomerType == 1 ? WholeChannelData.DigitalChannelDailyLoginCountsIndividual
+                                                     : WholeChannelData.DigitalChannelDailyLoginCountsCorporate;
+
+                    referanceDataForPreviousMonth = CustomerType == 1 ? WholeChannelData.DigitalChannelDailyForPreviousMonthLoginCountsIndividual
+                                                   : WholeChannelData.DigitalChannelDailyForPreviousMonthLoginCountsCorporate;                    
+                    $.each(referanceData, function(i, item){                       
+if(!item.BonusFlasGunlukMusteri){
+                            item.BonusFlasGunlukMusteri = 0;
+                            item.BonusFlasLoginSayısı = 0;
+                        }
+                        categories.push(moment(item.Date).toDate().getDate());
+var dayName = Resources.Days[moment(item.Date).toDate().getDay()];
+                        dataInternet.push({ y:IsNull(item.IntSubeKumulatifMusteri), login:IsNull(item.IntSubeLoginSayısı).format(0,3,'.'), avgResponseTime: IsNull(item.IntSubeKumFark).format(0,3,'.') ,date: moment(item.Date)});                        
+                        dataCepSube.push({y:IsNull(item.CepSubeKumulatifMusteri), login:IsNull(item.CepSubeLoginSayısı).format(0,3,'.'),avgResponseTime: IsNull(item.CepSubeKumFark).format(0,3,'.') , date: moment(item.Date)});
+                        dataIGaranti.push({y:IsNull(item.GarantiOneKumulatifMusteri), login:IsNull(item.GarantiOneLoginSayısı).format(0,3,'.'), avgResponseTime: IsNull(item.GarantiOneKumFark).format(0,3,'.') , date: moment(item.Date)});
+                        dataBonusFlas.push({y: IsNull(item.BonusFlasKumulatifMusteri) , login: IsNull(item.BonusFlasLoginSayısı).format(0,3,'.'),  avgResponseTime: IsNull(item.BonusFlasKumFark).format(0,3,'.') , date: moment(item.Date)});
+                        dataATM.push({y:IsNull(item.ATMKumulatifMusteri), login:IsNull(item.ATMLogin).format(0,3,'.'),avgResponseTime: IsNull(item.ATMKumFark).format(0,3,'.') , date: moment(item.Date)});
+
+                    });
+
+                    $.each(referanceDataForPreviousMonth, function(i, item){    
+if(!item.BonusFlasGunlukMusteri){
+                            item.BonusFlasGunlukMusteri = 0;
+                            item.BonusFlasLoginSayısı = 0;
+                        }
+                        categoriesForLastMonth.push(moment(item.Date).toDate().getDate());
+var dayName = Resources.Days[moment(item.Date).toDate().getDay()];
+                        dataInternetLastMonth.push({y:IsNull(item.IntSubeKumulatifMusteri), login:IsNull(item.IntSubeLoginSayısı).format(0,3,'.'),avgResponseTime:IsNull(item.IntSubeKumFark).format(0,3,'.'), date: moment(item.Date)});                        
+                        dataCepSubeLastMonth.push({y:IsNull(item.CepSubeKumulatifMusteri), login:IsNull(item.CepSubeLoginSayısı).format(0,3,'.'), avgResponseTime: IsNull(item.CepSubeKumFark).format(0,3,'.'),date: moment(item.Date)});
+                        dataIGarantiLastMonth.push({y:IsNull(item.GarantiOneKumulatifMusteri), login:IsNull(item.GarantiOneLoginSayısı).format(0,3,'.'),avgResponseTime: IsNull(item.GarantiOneKumFark).format(0,3,'.'), date: moment(item.Date)});
+                        dataBonusFlasLastMonth.push({y: IsNull(item.BonusFlasKumulatifMusteri) , login: IsNull(item.BonusFlasLoginSayısı).format(0,3,'.'),avgResponseTime: IsNull(item.BonusFlasKumFark).format(0,3,'.'), date: moment(item.Date)});
+                        dataATMLastMonth.push({y:IsNull(item.ATMKumulatifMusteri), login: IsNull(item.ATMLogin).format(0,3,'.'),avgResponseTime: IsNull(item.ATMKumFark).format(0,3,'.'), date: moment(item.Date) });
+
+                    });
+                }
+else{
+                    referanceData = CustomerType == 1 ? WholeChannelData.DigitalChannelYearlyLoginCountsIndividual
+                                                    : WholeChannelData.DigitalChannelYearlyLoginCountsCorporate;
+
+                    maxXaxis = 11;
+                    categories = Resources.Months;
+
+                    $.each(referanceData, function(i, item){  
+if(!item.BonusFlasMusteri){
+                            item.BonusFlasMusteri = 0;
+                            item.BonusFlasLoginSayısı = 0;
+                        }
+
+                        dataInternet.push({y:IsNull(item.IntSubeMusteri), login: IsNull(item.IntSubeLoginSayısı).format(0,3,'.')});
+                        dataCepSube.push({y:IsNull(item.CepSubeMusteri), login:IsNull(item.CepSubeLoginSayısı).format(0,3,'.')});
+                        dataIGaranti.push({y:IsNull(item.GarantiOneMusteri), login:IsNull(item.GarantiOneLoginSayısı).format(0,3,'.')});
+                        dataBonusFlas.push({y: IsNull(item.BonusFlasMusteri), login:IsNull(item.BonusFlasLoginSayısı).format(0,3,'.')});
+                        dataATM.push({y:IsNull(item.ATMMusteri), login:IsNull(item.ATMLogin).format(0,3,'.')});
+                    });
+
+                }      
+
+var seriesForMobileView = [                       
+                            {
+                                id:1,
+                                name: Resources.MobileBranch,
+                                color: 'rgb(73,150,235)',
+                                data: dataCepSube,
+                                dataLastMonth: dataCepSubeLastMonth,
+                                previousItemTitle: Resources.LastMonth,
+                                visible: true,
+                            } ,
+                            {
+                                id:2,
+                                name: Resources.iGaranti,
+                                color: 'rgb(244, 183, 76)',
+                                data: dataIGaranti,
+                                dataLastMonth: dataIGarantiLastMonth,
+                                previousItemTitle: Resources.LastMonth,
+                                visible: false,
+                            } ,
+                             {
+                                 id:3,
+                                 name: Resources.BonusFlash,
+                                 color: 'rgb(180,78,195)',
+                                 data: dataBonusFlas,
+                                 dataLastMonth: dataBonusFlasLastMonth,
+                                 previousItemTitle: Resources.LastMonth,
+                                 visible: false
+                             },
+                              {
+                                  id:4,
+                                  name: Resources.InternetBranch,
+                                  color: 'rgb(38,158,157)',
+                                  data:dataInternet,
+                                  dataLastMonth: dataInternetLastMonth,
+                                  previousItemTitle: Resources.LastMonth,
+                                  visible: false
+                              } 
+                              ,
+                               {
+                                   id:5,
+                                   name: Resources.ATM,
+                                   color: '#e65e5e',
+                                   data:dataATM,
+                                   dataLastMonth: dataATMLastMonth,
+                                   previousItemTitle: Resources.LastMonth,
+                                   visible: false
+                               }  
+                ];
+if(DateMode == 1 && (isCompareMode || IsCompareModeForMobile)){
+
+if(typeof selectedLegendId === "undefined"){
+                        selectedLegendId = 1;
+                    }
+
+if(categories.length < categoriesForLastMonth.length){
+                        categories = categoriesForLastMonth;
+                    }
+
+var currentSerieItem = null;
+                    $.each(seriesForMobileView, function(i, serieItem){
+if(serieItem.id == selectedLegendId){
+                            serieItem.visible = true;
+                            currentSerieItem = serieItem;
+                        }
+else{
+                            serieItem.visible = false;
+                        }
+                    });
+
+
+                    seriesForMobileView.push(
+                        {
+                            id: 6,
+                            name: currentSerieItem.previousItemTitle ,
+                            color: '#dadfe4',
+                            data: currentSerieItem.dataLastMonth,
+                            isPreviousItem: true
+                        }  
+                        );
+                }
+elseif(DateMode == 1 && !isCompareMode && !IsCompareModeForMobile){
+var currentDate = new Date();
+var month = $('#slcDate').find('.dropdown-toggle').attr('data-month'); 
+var year = $('#slcDate').find('.dropdown-toggle').attr('data-year'); 
+var currentMonth = currentDate.getMonth() + 1;
+var currentYear = currentDate.getFullYear();
+if(typeof month === "undefined"&&typeof year === "undefined"){
+                        month = currentDate.getMonth() + 1;
+                        year = currentDate.getFullYear();
+                    }
+
+if(month == currentMonth && year == currentYear){
+var dayCount = new Date(currentYear, currentMonth, 0).getDate();
+var newCategories = [];
+                        maxXaxis = dayCount - 1;
+for(var i = 1; i <= dayCount; i++){
+                            newCategories.push(i);
+                        }
+
+                        categories = newCategories;
+                    }
+                }
+
+                $('#middleLineChartForMobileBranch').
+                    highcharts(getLineChartOptionsForMobileView(categories, seriesForMobileView, maxXaxis));
+                HideLoading();
+            }
+
+function refreshPieChartLoginData(){
+try{
+var referanceData =  CustomerType == 1 ? WholeChannelData.DigitalChannelTransactionLoginCountsIndividual[0]
+                                                           : WholeChannelData.DigitalChannelTransactionLoginCountsCorporate[0];
+
+var referanceSubData = CustomerType == 1 ? WholeChannelData.DigitalChannelTransactionLoginCountsIndividualDetail[0]
+                                                             : WholeChannelData.DigitalChannelTransactionLoginCountsCorporateDetail[0];
+
+var leftChartData = [
+                                       { name: Resources.MobileBranch, 
+                                       y: referanceData.CepSubeLogin ? referanceData.CepSubeLogin : 0, 
+                                           colorArr: mobileBranchColorArrForPie ,
+                                           subData: [
+                                                {name: Resources.iPhone, y: referanceSubData.IphoneCepsubeValue},
+                                               {name: Resources.AndroidPhone, y: referanceSubData.AndroidCepSubeValue}
+                                           ]                                    
+
+                                       } ,
+                                       { name: Resources.BonusFlash, y:referanceData.BonusFlasLogin ? referanceData.BonusFlasLogin : 0, colorArr: bonusFlashColorArrForPie ,
+                                           subData: [
+                                                 {name: Resources.AndroidPhone, y: referanceSubData.BonusFlasAndroid ? referanceSubData.BonusFlasAndroid : 0 },                                 
+                                                 {name: Resources.iPhone, y: referanceSubData.bonusFlasIOS ? referanceSubData.bonusFlasIOS : 0 }                           
+                                           ]
+                                       },
+                                       { name: Resources.iGaranti, y: referanceData.GarantiOneLogin ? referanceData.GarantiOneLogin : 0, colorArr: iGarantiColorArrForPie,
+                                           subData: [
+                                                    {name: Resources.iPhone, y: referanceSubData.GarantiOneIOS }  ,
+                                                    {name: Resources.AndroidPhone, y: referanceSubData.GarantiOneAndroid } 
+                                           ]}
+                                       , { name: Resources.GarantiTablet, y: referanceData.GarantiTabletLogin ? referanceData.GarantiTabletLogin : 0, colorArr: mobileWebColorArrForPie,
+                                            subData: [
+                                                      {name: Resources.iPad, y: referanceSubData.GarantiTabletIOS }  ,
+                                                      {name: Resources.AndroidTablet, y: referanceSubData.GarantiTabletAndroid }  
+
+
+                                            ]}   
+                    ];
+
+
+var total1 = referanceData.CepSubeLogin + referanceData.BonusFlasLogin + referanceData.GarantiOneLogin +referanceData.GarantiTabletLogin;
+
+                    $('#mblChartLeftForTransactions').
+                        highcharts(getPieChartOptionsForLoginView(leftChartData, internetBankingColorArrForPie, total1, Resources.Customer,''));
+
+
+                    refreshPieChartRightForLogin(leftChartData[0].subData, leftChartData[0].colorArr,   referanceData.CepSubeLogin, leftChartData[0].name,'');
+                }
+catch(ex){
+                    console.log(ex);
+                }
+            }
+
+function refreshPieChartRightForLogin(data, colors, total, title, prefix){
+                $('#mblChartRightForTransactions').highcharts({                    
+                    chart: {
+                        spacingLeft: 0,    
+                        spacingRight: 0,    
+                        spacingBottom: 0, 
+                        spacingTop: 0, 
+                        plotBackgroundColor: null,
+                        plotBorderWidth: null,
+                        plotShadow: false,
+                        type: 'pie',                        
+                        style: {
+                            fontFamily: "Roboto",
+                            fontSize: '14px'
+                        }  
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    symbols: [ 'circle', 'square', 'square', 'square'],
+                    legend: {
+                        enabled: true,
+                        align: 'right',
+                        verticalAlign: 'middle',
+                        layout: 'vertical',
+                        useHTML:true,   
+                        padding: 10,
+                        x: 0,
+                        width:200,
+                        symbolWidth: 12,
+                        symbolRadius: 6,
+                        itemMarginBottom: 7,
+                        labelFormatter: function () {    
+return'<div class="pie-chart-legend"><span class="pie-chart-count" style="min-width:45px;">' + prefix + nFormatter(this.y) +'</span>'
+                                        + '  ' + '<span class="pie-chart-explanation">' + this.name + '</span></div>';
+                        }                 
+                    },
+                    title: {
+                        text: nFormatter(total),
+                        align: 'center',
+                        y:10,
+                        x: -110,
+                        verticalAlign: 'middle',
+                        style: {
+                            fontSize: '34px',
+                            fontWeight: '',
+                            fontFamily: "Roboto",
+                            color: ''
+                        }
+                    },
+                    subtitle: {
+                        text: title,
+                        align: 'center',
+                        verticalAlign: 'middle',
+                        y:-30,
+                        x:-110,
+                        style: {
+                            fontSize: '15px',
+                            fontWeight: '',
+                            fontFamily: "RobotoMedium",
+                            color: '#666666'
+                        }
+
+                    },
+                    tooltip: {
+                        pointFormat: '{series.percentage:.1f}%</b>',
+                        enabled:true,
+                        formatter: function() {                           
+var point = this.point;
+return point.name + ': <b>'+ (point.y).format(0, 3, '.') + '</b>';
+                        }
+                    },
+                    plotOptions: {
+                        series: {
+                            color: '#71c120',
+                            fillColor: '#f0f8e8'
+                        },
+                        pie: {
+                            slicedOffset: 0,
+                            size: '100%',
+                            center: ['50%', '50%'],
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            dataLabels: {
+                                inside: false,
+                                enabled: false,
+                                useHTML: true,
+                                formatter: function () {
+return'<div style="font-weight: normal;">' + this.point.name + ': ' + this.point.y.format(0,3,'.') + ' ; ' + Math.round(this.percentage) + ' %</div>';
+                                }
+                            },
+                            showInLegend: true ,
+                            colors: colors
+                        }
+                    },
+                    series: [{
+                        name: '',
+                        colorByPoint: true,
+                        data: data,
+                        innerSize: '70%'
+                    }]
+                });
+            }
+
+function refreshPieChartATMData(){
+try{
+var referanceData =  CustomerType == 1 ? WholeChannelData.DigitalChannelTransactionATMCountsIndividual[0]
+                                                           :null;
+
+var referanceSubData =  CustomerType == 1 ? WholeChannelData.DigitalChannelTransactionATMCountsIndividualDetail[0]
+                                                            :null;
+var leftChartData = [
+                                       { name: Resources.CardCustomer, 
+                                           y: referanceData.KartlıMusteri, 
+                                           colorArr: mobileBranchColorArrForPie ,
+                                           subData: [
+                                               {name:Resources.ParaÇekme, y: IsNull(referanceSubData.KartlıParaÇekme)},
+                                               {name: Resources.KKBorcOdeme, y:IsNull(referanceSubData.KartlıKKBorcOdeme)},
+                                               {name: Resources.HesabaParaYatırma, y: IsNull(referanceSubData.KartlıHesabaParaYatırma)},
+                                               {name: Resources.NakitAvans, y: IsNull(referanceSubData.KartlıNakitAvans)},     
+                                               {name: Resources.KartliFatura, y: IsNull(referanceSubData.KartliFatura)},
+                                               {name: Resources.Diğer, y: IsNull(referanceSubData.KartlıDiğer)}
+                                           ]                                    
+
+                                       } ,
+                                       { name: Resources.NoCardCusmoter,
+                                           y:referanceData.KartsızMusteri ,
+                                           colorArr: bonusFlashColorArrForPie ,
+                                           subData: [
+                                               {name: Resources.KartsızParaYatırma, y: IsNull(referanceSubData.KartsızHesabaParaYatırma)},
+                                               {name:Resources.KartsızQRParaÇekme, y: IsNull(referanceSubData.KartsizQRparacekme)},
+                                               {name: Resources.KartsızCBParaCekme, y: IsNull(referanceSubData.KartsizCepbankParaCekme)},
+                                               {name: Resources.KartsızKKBorcOdeme, y: IsNull(referanceSubData.KartsızKKBorcOdeme)},
+                                               {name: Resources.KartsızFatura, y: IsNull(referanceSubData.KartsizFatura)},
+                                               {name: Resources.KartsizDiger, y: IsNull(referanceSubData.KartsizDiger)}
+                                           ]
+                                       },
+                                       { name: Resources.NotOnUs, 
+                                           y: referanceData.NotonUs, 
+                                           colorArr: iGarantiColorArrForPie,
+                                           subData: [
+                                               {name:Resources.ParaÇekme, y:  IsNull(referanceSubData.Notonusparacekme)},
+                                               {name:Resources.NakitAvans, y:  IsNull(referanceSubData.Notonusnakitavans)},
+                                               {name: Resources.Diğer, y: IsNull(referanceSubData.Notonusdiger)}
+
+
+                                           ]
+                                       }
+
+                    ];
+
+
+var total =referanceData.ATMEtkinMusteriToplam;
+var total2= referanceData.KartlıMusteri+referanceData.KartsızMusteri+referanceData.NotonUs;
+                    $('#mblChartLeftForTransactions2').
+                        highcharts(getPieChartOptionsForATMView(leftChartData, internetBankingColorArrForPie, total,total2, Resources.ActiveCustomer ,''));
+
+                    refreshPieChartRightForATM(leftChartData[0].subData, leftChartData[0].colorArr, referanceData.KartlıMusteri, leftChartData[0].name,'');
+                }
+catch(ex){
+                    console.log(ex);
+                }
+            }
+
+function refreshPieChartRightForATM(data, colors, total, title, prefix){
+
+                $('#mblChartRightForTransactions2').highcharts({                    
+                    chart: {
+                        spacingLeft: 0,    
+                        spacingRight: 0,    
+                        spacingBottom: 0, 
+                        spacingTop: 0, 
+                        plotBackgroundColor: null,
+                        plotBorderWidth: null,
+                        plotShadow: false,
+//marginLeft: 20,
+                        type: 'pie',                        
+                        style: {
+                            fontFamily: "Roboto",
+                            fontSize: '14px'
+                        }  
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    symbols: [ 'circle', 'square', 'square', 'square'],
+                    legend: {
+                        enabled: true,
+                        align: 'right',
+                        verticalAlign: 'middle',
+                        layout: 'vertical',
+                        useHTML:true,   
+                        padding: 10,
+                        x: 0,
+                        width:200,
+                        symbolWidth: 12,
+                        symbolRadius: 6,
+                        itemMarginBottom: 7,
+                        labelFormatter: function () {    
+return'<div class="pie-chart-legend"><span class="pie-chart-count" style="min-width:45px;">' + prefix + nFormatter(this.y) +'</span>'
+                                        + '  ' + '<span class="pie-chart-explanation">' + this.name + '</span></div>';
+                        }                 
+                    },
+                    title: {
+                        text: nFormatter(total),
+                        align: 'center',
+                        y:10,
+                        x: -110,
+                        verticalAlign: 'middle',
+                        style: {
+                            fontSize: '34px',
+                            fontWeight: '',
+                            fontFamily: "Roboto",
+                            color: ''
+                        }
+                    },
+                    subtitle: {
+                        text: title,
+                        align: 'center',
+                        verticalAlign: 'middle',
+                        y:-30,
+                        x:-110,
+                        style: {
+                            fontSize: '15px',
+                            fontWeight: '',
+                            fontFamily: "RobotoMedium",
+                            color: '#666666'
+                        }
+
+                    },
+                    tooltip: {
+                        pointFormat: '{series.percentage:.1f}%</b>',
+                        enabled:true,
+                        formatter: function() {                           
+var point = this.point;
+return point.name + ': <b>'+ (point.y).format(0, 3, '.') + '</b>';
+                        }
+                    },
+                    plotOptions: {
+                        pie: {
+                            slicedOffset: 0,
+                            size: '100%',
+                            center: ['50%', '50%'],
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            dataLabels: {
+                                inside: false,
+                                enabled: false,
+                                useHTML: true,
+                                formatter: function () {
+return'<div style="font-weight: normal;">' + this.point.name + ': ' + this.point.y.format(0,3,'.') + ' ; ' + Math.round(this.percentage) + ' %</div>';
+                                }
+                            },
+                            showInLegend: true ,
+                            colors: colors
+                        }
+                    },
+                    series: [{
+                        name: '',
+                        colorByPoint: true,
+                        data: data,
+                        innerSize: '70%'
+                    }]
+                });
+            }
+
+
+function getLineChartOptionsForInternetView(categories, series, maxXaxis){
+return {
+                    chart: {
+                        spacingLeft: 0,    
+                        spacingRight: 0,    
+                        spacingBottom: 0, 
+                        style: {
+                            fontFamily: "Roboto",
+                            fontSize: '12px',
+                            color: '#848484'
+                        }  
+                    },
+                    symbols: ['circle', 'circle', 'circle', 'circle'], 
+                    title: {
+                        text: '',
+                    },
+                    subtitle: {
+                        text: '',                    
+                    },
+                    credits:false,
+                    xAxis: {
+                        categories: categories,
+                        max:maxXaxis,
+                        labels: {
+                            style: {
+                                color: '#848484',
+                                fontSize: '12px',
+                            }
+                        }
+                    },                   
+                    yAxis: {
+                        title: {
+                            text: ''
+                        },
+                        labels: {
+                            style: {
+                                color: '#848484'
+                            }
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#848484',
+                            fontSize: '12px',
+                        }]
+                    },
+                    tooltip: {                       
+                        formatter: function() {
+if(DateMode == 1){
+var date =this.point.date.format("DD/MM/YYYY");
+return'<div class="middle-line-chart-tooltip"><div class="middle-line-chart-tooltip-header"><span>' + this.series.name + '</span><span style="float:right">' + date +'</span></div>'
+                                         +'<div class="middle-line-chart-tooltip-table-wrapper"><table><tr><td>' + Resources.Login + '&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</td><td> ' + IsNull(this.point.y).format(0, 3, '.') + '</td></tr>'
+                                         +'<tr><td>'+ Resources.DailyCustomer +'&nbsp&nbsp&nbsp</td><td> '+  this.point.login  +'</td></tr>'
+                                         +'<tr><td>' + Resources.AvgResponseTime + '&nbsp&nbsp&nbsp</td><td> ' + IsNull(this.point.avgResponseTime).toFixed(2)+'&nbsp' + '<i class="fa fa-arrow-up" aria-hidden="true" style="color:#35D112;"></i></td></tr>'
+                                         +'</table></div><div>';
+                            }else {
+return'<div class="middle-line-chart-tooltip"><div class="middle-line-chart-tooltip-header"><span>' + this.series.name + '</span></div>'
+                                            +'<div class="middle-line-chart-tooltip-table-wrapper"><table><tr><td>'+ Resources.MonthlyCustomer +'&nbsp&nbsp&nbsp</td><td> '+  this.point.login  +'</td></tr>'
+                                            +'<tr><td>' + Resources.Login + '&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</td><td> ' + IsNull(this.point.y).format(0, 3, '.') + '</td></tr>'
+                                            +'</table></div><div>';
+                            }
+
+
+
+                        },    
+                        useHTML: true,
+                        valueSuffix: '',                    
+                        borderWidth:0,
+                        borderRadius: 0,
+                        shadow: false,
+                        backgroundColor: 'rgba(35, 41, 56, 0.85)',
+                        style: {
+                            padding: 0,                        
+                        }
+                    },
+                    plotOptions:{
+                        line: {            
+                            events: {
+                                legendItemClick: function (event) {
+
+if(!IsCompareModeForInternet){
+var chart = event.currentTarget.chart;
+var legend = chart.legend;
+
+var item =  legend.allItems[event.currentTarget.index];
+                                        item.legendItem.attr({ text: getLineChartLegendFormat(!event.currentTarget.visible, item.options.name, item.options.color) });
+                                    }
+
+if(IsCompareModeForInternet &&
+                                        (event.currentTarget.options.isPreviousItem
+                                            || event.currentTarget.options.visible == true)){
+returnfalse;
+                                    }
+elseif(IsCompareModeForInternet &&this.options){
+                                        refreshLineChartDataForInternetView(true, this.options.id);                                       
+                                    }
+
+                                }
+                            }                           
+                        }
+                    },
+                    legend: {
+                        layout: 'horizontal',
+                        align: 'center',
+                        verticalAlign: 'bottom',
+                        borderWidth: 0,
+                        useHTML: true,
+                        symbolHeight: 0,
+                        labelFormatter: function(){                            
+return getLineChartLegendFormat(this.visible, this.name, this.color);
+                        },
+                    series: series
+                };
+            }
+
+function getLineChartOptionsForMobileView(categories, series, maxXaxis){
+return {
+                    chart: {
+                        spacingLeft: 0,    
+                        spacingRight: 0, 
+                        spacingBottom: 0, 
+                        style: {
+                            fontFamily: "Roboto",
+                            fontSize: '12px',
+                            color: '#848484'
+                        }  
+                    },
+                    symbols: ['circle', 'circle', 'circle', 'circle'], 
+                    title: {
+                        text: '',
+                    },
+                    subtitle: {
+                        text: '',                    
+                    },
+                    credits:false,
+                    xAxis: {
+                        categories: categories,
+                        max: maxXaxis,
+                        labels: {
+                            style: {
+                                color: '#848484',
+                                fontSize: '12px',
+                            }
+                        }
+                    },
+                    yAxis: {
+                        title: {
+                            text: ''
+                        },
+                        labels: {
+                            style: {
+                                color: '#848484'
+                            }
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#848484',
+                            fontSize: '12px',
+                        }]
+                    },
+                    tooltip: {                       
+                        formatter: function() {
+
+if(DateMode == 1){
+var date =this.point.date.format("DD/MM/YYYY");
+return'<div class="middle-line-chart-tooltip"><div class="middle-line-chart-tooltip-header"><span>' + this.series.name + '</span><span style="float:right">' + date +'</span></div>'
+                                         +'<div class="middle-line-chart-tooltip-table-wrapper"><table><tr><td>'+ Resources.CumulativeDailyCustomer +'&nbsp&nbsp&nbsp</td><td> '+ IsNull(this.point.y).format(0, 3, '.') +'</td></tr>'
+                                         +'<tr><td>' + Resources.CumulativeDiff + '&nbsp&nbsp&nbsp</td><td> ' + this.point.avgResponseTime+'&nbsp' + arrangeArrow(this.point.avgResponseTime)+'</td></tr>'
+                                         +'</table></div><div>';
+                            }else {
+return'<div class="middle-line-chart-tooltip"><div class="middle-line-chart-tooltip-header"><span>' + this.series.name + '</span></div>'
+                                            +'<div class="middle-line-chart-tooltip-table-wrapper"><table><tr><td>'+ Resources.MonthlyKumuleCustomer +'&nbsp&nbsp&nbsp</td><td> '+ IsNull(this.point.y).format(0, 3, '.') +'</td></tr>'
+                                            +'</table></div><div>';
+                            }
+                        },    
+                        useHTML: true,
+                        valueSuffix: '',                    
+                        borderWidth:0,
+                        borderRadius: 0,
+                        shadow: false,
+                        backgroundColor: 'rgba(35, 41, 56, 0.85)',
+                        style: {
+                            padding: 0,                        
+                        }
+                    },
+                    plotOptions: {
+                        line: {            
+                            events: {
+                                legendItemClick: function (event) {
+
+if(!IsCompareModeForMobile){
+var chart = event.currentTarget.chart;
+var legend = chart.legend;
+
+var item =  legend.allItems[event.currentTarget.index];
+                                        item.legendItem.attr({ text: getLineChartLegendFormat(!event.currentTarget.visible, item.options.name, item.options.color) });
+                                    }
+
+if(IsCompareModeForMobile &&
+                                        (event.currentTarget.options.isPreviousItem
+                                            || event.currentTarget.options.visible == true)){
+returnfalse;
+                                    }
+elseif(IsCompareModeForMobile &&this.options){
+                                        refreshLineChartDataForMobileView(true, this.options.id);                                       
+                                    }
+
+                                }
+                            }                           
+                        }
+                    },         
+                    legend: {
+                        layout: 'horizontal',
+                        align: 'center',
+                        verticalAlign: 'bottom',
+                        borderWidth: 0,
+                        useHTML: true,
+                        symbolHeight: 0,
+                        labelFormatter: function(){                            
+return getLineChartLegendFormat(this.visible, this.name, this.color);
+                        },
+                    },
+                    series: series
+                };
+            }
+
+function getLineChartLegendFormat(isVisible, name, color){
+var addStyle = isVisible ? "background-color:" + color + ";opacity:1;" : "";
+return'<div class="line-chart-legend"><div class="legend-square" style="border-color:' + color + '">'
+                       +'<div class="legend-square-inner" style="' + addStyle + '"></div>'
+                       +'</div><span>'+ name +'</span></div>';
+            }
+
+function getPieChartOptionsForLoginView(data, colors, total, title, prefix){
+
+return {              
+                    chart: {
+                        spacingLeft: 0,    
+                        spacingRight: 0,    
+                        spacingBottom: 0, 
+                        spacingTop: 0, 
+                        plotBackgroundColor: null,
+                        plotBorderWidth: null,
+                        plotShadow: false,
+                        type: 'pie',                        
+                        style: {
+                            fontFamily: "Roboto",
+                            fontSize: '14px'
+                        }  
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    symbols: [ 'circle', 'square', 'square', 'square'],
+                    legend: {
+                        enabled: true,
+                        align: 'right',
+                        verticalAlign: 'middle',
+                        layout: 'vertical',
+                        useHTML:true,   
+                        padding: 10,
+                        x: 0,
+                        width:200,
+                        symbolWidth: 12,
+                        symbolRadius: 6,
+                        itemMarginBottom: 7,
+                        labelFormatter: function () {    
+return'<div class="pie-chart-legend"><span class="pie-chart-count" style="min-width:45px;">' + prefix + nFormatter(this.y) +'</span>'
+                                        + '  ' + '<span class="pie-chart-explanation">' + this.name + '</span></div>';
+                        }                 
+                    },
+                    title: {
+                        text: nFormatter(total),
+                        align: 'center',
+                        y:10,
+                        x: -110,
+                        verticalAlign: 'middle',
+                        style: {
+                            fontSize: '34px',
+                            fontWeight: '',
+                            fontFamily: "Roboto",
+                            color: ''
+                        }
+                    },
+                    subtitle: {
+                        text: title,
+                        align: 'center',
+                        verticalAlign: 'middle',
+                        y:-30,
+                        x:-110,
+                        style: {
+                            fontSize: '15px',
+                            fontWeight: '',
+                            fontFamily: "RobotoMedium",
+                            color: '#666666'
+                        }
+
+                    },
+                    tooltip: {
+                        pointFormat: '{series.percentage:.1f}%</b>',
+                        enabled:true,
+                        formatter: function() {                           
+var point = this.point;
+return point.name + ': <b> %'+ (point.y*100/total).format(0, 3, '.') + '</b>';
+                        }
+                    },
+                    plotOptions: {
+                        pie: {
+                            slicedOffset: 0,
+                            size: '100%',
+                            center: ['50%', '50%'],
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            dataLabels: {
+                                inside: false,
+                                enabled: false,
+                                useHTML: true,
+                                formatter: function () {
+return'<div style="font-weight: normal;">' + this.point.name + ': ' + this.point.y.format(0,3,'.') + ' ; ' + Math.round(this.percentage) + ' %</div>';
+                                }
+                            },
+                            showInLegend: true ,
+                            colors: colors
+                        }
+                    },
+                    series: [{
+                        name: '',
+                        colorByPoint: true,
+                        data: data,
+                        innerSize: '70%',
+                        point:{
+                            events:{
+                                click: function (event) {    
+                                    refreshPieChartRightForLogin(this.subData, this.colorArr, this.y, this.name, '');
+                                }
+                            }
+                        }    
+                    }]
+                };
+            }
+
+function getPieChartLegendFormat(value, percentage, name)
+            {
+return'<div class="pie-chart-legend"><span class="pie-chart-count">' + nFormatter(value) + ' (%' + Math.round(percentage) + ')</span>'
+                        + '  ' + '<span class="pie-chart-explanation">' + name + '</span></div>';
+            }
+
+function getPieChartLegendFormatWithoutPercentage(value, name)
+            {
+return'<div class="pie-chart-legend"><span class="pie-chart-count">' + nFormatter(value) +'</span>'
+                        + '  ' + '<span class="pie-chart-explanation">' + name + '</span></div>';
+            }
+
+function getPieChartOptionsForATMView(data, colors, total,totalForPercent, title, prefix){
+return {              
+                    chart: {
+                        spacingLeft: 0,    
+                        spacingRight: 0,    
+                        spacingBottom: 0, 
+                        spacingTop: 0, 
+                        plotBackgroundColor: null,
+                        plotBorderWidth: null,
+                        plotShadow: false,
+                        type: 'pie',                        
+                        style: {
+                            fontFamily: "Roboto",
+                            fontSize: '14px'
+                        }  
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    symbols: [ 'circle', 'square', 'square', 'square'],
+                    legend: {
+                        enabled: true,
+                        align: 'right',
+                        verticalAlign: 'middle',
+                        layout: 'vertical',
+                        useHTML:true,   
+                        padding: 10,
+                        x: 0,
+                        width:200,
+                        symbolWidth: 12,
+                        symbolRadius: 6,
+                        itemMarginBottom: 7,
+                        labelFormatter: function () {    
+return'<div class="pie-chart-legend"><span class="pie-chart-count" style="min-width:45px;">' + prefix + nFormatter(this.y) +'</span>'
+                                        + '  ' + '<span class="pie-chart-explanation">' + this.name + '</span></div>';
+                        }                 
+                    },
+                    title: {
+                        text: nFormatter(total),
+                        align: 'center',
+                        y:10,
+                        x: -110,
+                        verticalAlign: 'middle',
+                        style: {
+                            fontSize: '34px',
+                            fontWeight: '',
+                            fontFamily: "Roboto",
+                            color: ''
+                        }
+                    },
+                    subtitle: {
+                        text: title,
+                        align: 'center',
+                        verticalAlign: 'middle',
+                        y:-30,
+                        x:-110,
+                        style: {
+                            fontSize: '15px',
+                            fontWeight: '',
+                            fontFamily: "RobotoMedium",
+                            color: '#666666'
+                        }
+
+                    },
+                    tooltip: {
+                        pointFormat: '{series.percentage:.1f}%</b>',
+                        enabled:true,
+                        formatter: function() {                           
+var point = this.point;
+return point.name + ': <b> %'+ (point.y*100/totalForPercent).format(0, 3, '.') + '</b>';
+                        }
+                    },
+                    plotOptions: {
+                        pie: {
+                            slicedOffset: 0,
+                            size: '100%',
+                            center: ['50%', '50%'],
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            dataLabels: {
+                                inside: false,
+                                enabled: false,
+                                useHTML: true,
+                                formatter: function () {
+return'<div style="font-weight: normal;">' + this.point.name + ': ' + this.point.y.format(0,3,'.') + ' ; ' + Math.round(this.percentage) + ' %</div>';
+                                }
+                            },
+                            showInLegend: true ,
+                            colors: colors
+                        }
+                    },
+                    series: [{
+                        name: '',
+                        colorByPoint: true,
+                        data: data,
+                        innerSize: '70%',
+                        point:{
+                            events:{
+                                click: function (event) {    
+                                    refreshPieChartRightForATM(this.subData, this.colorArr, this.y, this.name, '');
+                                }
+                            }
+                        }    
+                    }]
+                };
+            }
+function arrangeArrow(num){
+if(num<0)
+return'<i class="fa fa-arrow-down" aria-hidden="true"style="color:red"></i>&nbsp'
+elseif(num>0)
+return'<i class="fa fa-arrow-up" aria-hidden="true"style="color:#35D112"></i>&nbsp'
+
+            }
+function nFormatter(num) {
+if(num>999 || num<-999)
+return(num/1000).format(0, 3, '.') + 'K'
+elsereturn num;
+
+            }
+function minusPlusFormatter(num) {
+
+var plus= '<i class="fa fa-plus" aria-hidden="true"style="color:#359821"></i>&nbsp';
+var minus='<i class="fa fa-minus" aria-hidden="true"style="color:red"></i>&nbsp';
+if(num<0)
+return minus+'%'+num.replace(/\-/g, "");
+
+if(num>0)
+return plus+'%'+num.replace(/\-/g, "");
+            }
+
+function IsNull(val){
+
+if(val==null|| val==undefined || val=='')
+                {
+return 0;
+                }elsereturn val;
+
+            }
+
+            fillMonths();
+            $('#selectWorkAreaLink').text(SelectedDateText);
+
+        });
+</script>
+
+</asp:Content>
+
